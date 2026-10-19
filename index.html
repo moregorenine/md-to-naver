@@ -589,7 +589,6 @@
               id="sourceUrl"
               class="text-input mono-input"
               type="url"
-              value="https://moregorenine.github.io/git/git/"
               placeholder="https://moregorenine.github.io/..."
             />
             <button class="btn-primary" id="btnFetchUrl" type="button">불러오기</button>
@@ -669,6 +668,11 @@
           <label class="toggle-row">
             <span>목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거</span>
             <input type="checkbox" id="optUnwrapLiP" checked />
+          </label>
+
+          <label class="toggle-row">
+            <span>연속된 문단(<code>p + p</code>) 사이 빈 줄 삽입 (문단 분리)</span>
+            <input type="checkbox" id="optParagraphSpacing" checked />
           </label>
 
           <div class="toggle-row" style="margin-top:4px;">
@@ -774,6 +778,7 @@
       const codeToTable = document.getElementById('optCodeToTable').checked;
       const quoteToTable = document.getElementById('optQuoteToTable').checked;
       const unwrapLiP = document.getElementById('optUnwrapLiP').checked;
+      const paragraphSpacing = document.getElementById('optParagraphSpacing').checked;
       const codeTheme = document.getElementById('optCodeTheme').value;
 
       // 1. Remove excluded selectors + optional <hr>
@@ -811,7 +816,11 @@
       // 2. Unwrap <p> inside <li>
       if (unwrapLiP) {
         clone.querySelectorAll('li > p').forEach(p => {
+          const hasNextP = p.nextElementSibling && p.nextElementSibling.tagName === 'P';
           while (p.firstChild) p.parentNode.insertBefore(p.firstChild, p);
+          if (hasNextP) {
+            p.parentNode.insertBefore(document.createElement('br'), p);
+          }
           p.remove();
         });
       }
@@ -863,8 +872,13 @@
       // 6. Blockquote -> 1x1 Table with left accent border
       if (quoteToTable) {
         clone.querySelectorAll('blockquote').forEach(bq => {
-          bq.querySelectorAll('p').forEach(p => {
+          const bqParas = Array.from(bq.querySelectorAll('p'));
+          bqParas.forEach((p, idx) => {
             while (p.firstChild) p.parentNode.insertBefore(p.firstChild, p);
+            if (idx < bqParas.length - 1) {
+              p.parentNode.insertBefore(document.createElement('br'), p);
+              p.parentNode.insertBefore(document.createElement('br'), p);
+            }
             p.remove();
           });
           const table = document.createElement('table');
@@ -907,9 +921,30 @@
       });
 
       // 8. Paragraphs & Lists
-      clone.querySelectorAll('p').forEach(p => {
+      // Naver SmartEditor ONE ignores CSS margin on <p> tags, causing consecutive <p> tags
+      // to stick together without a blank line. Insert an explicit <p><br></p> spacer between consecutive <p> tags.
+      const pStyle = paragraphSpacing
+        ? 'font-size: 16px; line-height: 1.7; color: #333333; margin: 0; border: none;'
+        : 'font-size: 16px; line-height: 1.7; color: #333333; margin: 0 0 16px 0; border: none;';
+
+      const allParas = Array.from(clone.querySelectorAll('p'));
+      allParas.forEach(p => {
         p.removeAttribute('class');
-        p.setAttribute('style', 'font-size: 16px; line-height: 1.7; color: #333333; margin: 0 0 8px 0; border: none;');
+        p.setAttribute('style', pStyle);
+
+        if (paragraphSpacing) {
+          const nextEl = p.nextElementSibling;
+          const isCurrentEmpty = !p.textContent.trim() && !p.querySelector('img, iframe, video');
+          if (nextEl && nextEl.tagName === 'P' && !isCurrentEmpty) {
+            const isNextEmpty = !nextEl.textContent.trim() && !nextEl.querySelector('img, iframe, video');
+            if (!isNextEmpty) {
+              const spacerP = document.createElement('p');
+              spacerP.setAttribute('style', pStyle);
+              spacerP.innerHTML = '<br>';
+              p.parentNode.insertBefore(spacerP, nextEl);
+            }
+          }
+        }
       });
 
       clone.querySelectorAll('ul, ol').forEach(list => {
@@ -985,7 +1020,7 @@
       const excl = excludeSelectorInput.value.trim().replace(/'/g, "\\'");
       bmSelectorLabel.textContent = targetSelectorInput.value.trim() || '.page__content';
 
-      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('영역 없음');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{bq.querySelectorAll('p').forEach(p=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});c.querySelectorAll('p').forEach(p=>{p.removeAttribute('class');p.setAttribute('style','font-size:16px;line-height:1.7;color:#333333;margin:0 0 8px 0;border:none;')});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('✅ 네이버 블로그용 복사 완료!');})();`;
+      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('영역 없음');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{const n=p.nextElementSibling&&p.nextElementSibling.tagName==='P';while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(n)p.parentNode.insertBefore(document.createElement('br'),p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{const ps=Array.from(bq.querySelectorAll('p'));ps.forEach((p,i)=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(i<ps.length-1){p.parentNode.insertBefore(document.createElement('br'),p);p.parentNode.insertBefore(document.createElement('br'),p)}p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});const ps='font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;';Array.from(c.querySelectorAll('p')).forEach(p=>{p.removeAttribute('class');p.setAttribute('style',ps);const nx=p.nextElementSibling;if(nx&&nx.tagName==='P'&&(p.textContent.trim()||p.querySelector('img'))){const sp=document.createElement('p');sp.setAttribute('style',ps);sp.innerHTML='<br>';p.parentNode.insertBefore(sp,nx)}});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('✅ 네이버 블로그용 복사 완료!');})();`;
 
       bookmarkletLink.setAttribute('href', bmCode);
     }
@@ -1065,9 +1100,11 @@
 title: "샘플 포스트 — 네이버 블로그 서식 테스트"
 ---
 
-## 1. 소제목 밑줄 및 구분선 제거 테스트
+## 1. 소제목 밑줄 및 문단 분리 테스트
 
 GitHub Pages(\`minimal-mistakes\`)의 \`<h2>\` 밑줄(\`border-bottom\`)이 제거되어 네이버 스마트에디터에서 거대한 구분선이 생성되지 않습니다.
+
+연속된 \`<p>\` 태그가 나올 때도 스마트에디터가 \`margin\`을 무시하여 문단이 다닥다닥 붙어버리는 문제를 방지하기 위해 문단 사이에 빈 줄(\`<p><br></p>\`)이 자동으로 삽입됩니다.
 
 ---
 
@@ -1085,10 +1122,11 @@ function helloNaverBlog() {
 | 기능 항목 | 기본 붙여넣기 | **MD2Naver 변환 후** |
 | :--- | :--- | :--- |
 | **소제목 밑줄** | 거대 구분선 생성됨 | **깔끔한 소제목 유지** |
+| **연속 문단(p+p)** | 빈 줄 없이 다닥다닥 붙음 | **문단 사이 빈 줄 자동 분리** |
 | **코드 블록** | 일반 텍스트로 풀림 | **1칸 표 박스로 보존** |
 | **목록 줄간격** | 2줄씩 벌어짐 | **딱 맞게 밀착** |
 
-> 💡 **인용구 테스트:** 인용구 역시 내부 \`<p>\` 태그를 제거하고 왼쪽 포인트 보더가 들어간 1칸 표로 변환되어 깨지지 않습니다.
+> 💡 **인용구 테스트:** 인용구 역시 내부 \`<p>\` 태그를 정리하고 왼쪽 포인트 보더가 들어간 1칸 표로 변환되어 깨지지 않습니다.
 `;
       rawInputTextarea.value = sampleMd;
       const cleanedMd = stripFrontMatter(sampleMd);
@@ -1129,7 +1167,7 @@ function helloNaverBlog() {
     excludeSelectorInput.addEventListener('input', updatePreview);
 
     // Options change listeners
-    ['optRemoveHr', 'optStripHeaderBorder', 'optCodeToTable', 'optQuoteToTable', 'optUnwrapLiP', 'optCodeTheme'].forEach(id => {
+    ['optRemoveHr', 'optStripHeaderBorder', 'optCodeToTable', 'optQuoteToTable', 'optUnwrapLiP', 'optParagraphSpacing', 'optCodeTheme'].forEach(id => {
       document.getElementById(id).addEventListener('change', updatePreview);
     });
 
