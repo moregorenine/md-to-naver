@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MD2Naver — GitHub Pages & 마크다운 네이버 블로그 서식 변환기</title>
+  <meta name="description" content="GitHub Pages(Jekyll) 웹페이지 또는 마크다운 문서를 네이버 블로그 스마트에디터 ONE에 서식 깨짐 없이 복사하는 도구" />
+  <!-- Pretendard & JetBrains Mono Fonts -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg-app: #0f172a;
+      --bg-panel: #1e293b;
+      --bg-panel-elevated: #263349;
+      --bg-input: #0f172a;
+      --border-color: #334155;
+      --border-focus: #03c75a;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --naver-green: #03c75a;
+      --naver-green-hover: #02b350;
+      --naver-green-soft: rgba(3, 199, 90, 0.14);
+      --accent-blue: #38bdf8;
+      --danger: #f43f5e;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .topbar {
+      height: 64px;
+      padding: 0 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #03c75a 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(3, 199, 90, 0.35);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--naver-green-soft);
+      color: var(--naver-green);
+      border: 1px solid rgba(3, 199, 90, 0.3);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 20px;
+      padding: 20px 24px;
+      max-width: 1680px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Mode Tabs */
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 6px;
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border-color);
+      gap: 6px;
+    }
+
+    .mode-tab {
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .mode-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .mode-tab.active {
+      background: var(--bg-panel-elevated);
+      color: var(--naver-green);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Form Controls */
+    .control-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .text-input,
+    .textarea-input,
+    .select-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .mono-input {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .text-input:focus,
+    .textarea-input:focus,
+    .select-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.18);
+    }
+
+    .textarea-input {
+      min-height: 250px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    /* Preset Chips */
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .chip {
+      font-size: 11.5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'JetBrains Mono', sans-serif;
+    }
+
+    .chip:hover,
+    .chip.active {
+      border-color: var(--naver-green);
+      color: var(--naver-green);
+      background: var(--naver-green-soft);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--naver-green);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 18px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(3, 199, 90, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--naver-green-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--bg-panel-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    /* Options Grid */
+    .options-box {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .options-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      accent-color: var(--naver-green);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* Preview Area (Right Panel) */
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview-stats {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-container {
+      flex: 1;
+      background: #ffffff;
+      color: #222222;
+      padding: 36px 44px;
+      overflow-y: auto;
+      max-height: calc(100vh - 180px);
+    }
+
+    @media (max-width: 768px) {
+      .preview-container {
+        padding: 20px;
+      }
+    }
+
+    .preview-inner {
+      max-width: 740px;
+      margin: 0 auto;
+      font-family: 'Nanum Gothic', 'Pretendard', Dotum, sans-serif;
+    }
+
+    .html-source-view {
+      display: none;
+      flex: 1;
+      background: #0b1120;
+      color: #e2e8f0;
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: calc(100vh - 180px);
+    }
+
+    /* Bookmarklet Card */
+    .bookmarklet-box {
+      background: linear-gradient(135deg, rgba(3, 199, 90, 0.12) 0%, rgba(56, 189, 248, 0.1) 100%);
+      border: 1px dashed rgba(3, 199, 90, 0.5);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .bookmarklet-drag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--naver-green);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13.5px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(3, 199, 90, 0.35);
+      cursor: grab;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #0f172a;
+      color: #fff;
+      border: 1px solid var(--naver-green);
+      border-left: 5px solid var(--naver-green);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .status-banner {
+      font-size: 12.5px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #bae6fd;
+    }
+
+    .status-banner.error {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.35);
+      color: #fecdd3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div class="brand-title">
+        MD2Naver Studio
+        <span class="badge">SmartEditor ONE 호환</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost" id="btnLoadSample" type="button">✨ 샘플 불러오기</button>
+      <a class="btn-ghost" href="https://moregorenine.github.io" target="_blank" rel="noopener">🏠 블로그 홈</a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+    <!-- Left Control Panel -->
+    <section class="panel">
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" data-mode="url" type="button">🌐 웹 URL 추출</button>
+        <button class="mode-tab" data-mode="markdown" type="button">📝 마크다운 / HTML</button>
+        <button class="mode-tab" data-mode="bookmarklet" type="button">🔖 북마클릿 생성</button>
+      </div>
+
+      <div class="control-body">
+        <!-- Common Target Selector Input (Always visible as requested) -->
+        <div class="field-group">
+          <label class="field-label" for="targetSelector">
+            <span>🎯 복사할 영역 클래스명 / CSS 선택자</span>
+            <span style="font-size:11px; color:var(--naver-green);">점(.) 생략 가능</span>
+          </label>
+          <input
+            id="targetSelector"
+            class="text-input mono-input"
+            type="text"
+            value=".page__content"
+            placeholder="예: .page__content 또는 page__content, article"
+          />
+          <div class="chip-list" id="selectorChips">
+            <button type="button" class="chip active" data-selector=".page__content">Minimal Mistakes (.page__content)</button>
+            <button type="button" class="chip" data-selector="article">기본 태그 (article)</button>
+            <button type="button" class="chip" data-selector=".post-content, .entry-content">Jekyll 기본 (.post-content)</button>
+            <button type="button" class="chip" data-selector=".contents_style, .tt_article_useless_p_margin">티스토리 (.contents_style)</button>
+            <button type="button" class="chip" data-selector="main">전체 (main)</button>
+          </div>
+          <p class="field-hint">
+            클래스명만 입력해도(예: <code>page__content</code>) 자동으로 <code>.page__content</code>와 태그를 찾아 추출합니다.
+          </p>
+        </div>
+
+        <!-- MODE 1: URL Fetch -->
+        <div id="modeUrlSection" class="field-group">
+          <label class="field-label" for="sourceUrl">
+            <span>🔗 가져올 웹페이지 URL</span>
+          </label>
+          <div class="input-row">
+            <input
+              id="sourceUrl"
+              class="text-input mono-input"
+              type="url"
+              value="https://moregorenine.github.io/git/git/"
+              placeholder="https://moregorenine.github.io/..."
+            />
+            <button class="btn-primary" id="btnFetchUrl" type="button">불러오기</button>
+          </div>
+          <div id="fetchStatus" class="status-banner hidden"></div>
+          <p class="field-hint">
+            GitHub Pages 포스트 주소를 입력하고 <strong>[불러오기]</strong>를 누르면 위에서 지정한 클래스 영역만 추출해 네이버 스마트에디터용으로 자동 세탁합니다.
+          </p>
+        </div>
+
+        <!-- MODE 2: Markdown / HTML Direct Input -->
+        <div id="modeMarkdownSection" class="field-group hidden">
+          <label class="field-label" for="rawInput">
+            <span>📄 마크다운(.md) 또는 HTML 원문 붙여넣기</span>
+            <button class="btn-ghost" id="btnClearRaw" type="button" style="padding:2px 8px; font-size:11px;">비우기</button>
+          </label>
+          <textarea
+            id="rawInput"
+            class="textarea-input mono-input"
+            placeholder="여기에 마크다운(.md) 파일 내용이나 HTML 코드를 붙여넣으세요. 상단 YAML Front Matter(---)는 자동으로 제거됩니다."
+          ></textarea>
+        </div>
+
+        <!-- MODE 3: Dynamic Bookmarklet Generator -->
+        <div id="modeBookmarkletSection" class="field-group hidden">
+          <div class="bookmarklet-box">
+            <div style="font-size:13px; font-weight:700; color:var(--text-primary);">
+              🚀 현재 설정된 클래스명(<code id="bmSelectorLabel" style="color:var(--naver-green);">.page__content</code>) 전용 북마클릿
+            </div>
+            <p class="field-hint">
+              아래 초록색 버튼을 마우스로 끌어다가 크롬 상단 <strong>북마크 바(즐겨찾기 바)</strong>에 놓으세요. 어떤 블로그에서든 버튼 클릭 한 번으로 즉시 복사됩니다.
+            </p>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+              <a id="bookmarkletLink" class="bookmarklet-drag" href="#">📋 네이버 블로그 변환 복사</a>
+              <button class="btn-secondary" id="btnCopyBookmarkletCode" type="button">북마클릿 코드 복사</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exclude Selectors -->
+        <div class="field-group">
+          <label class="field-label" for="excludeSelector">
+            <span>🧹 제거할 불필요 요소 선택자 (목차, 공유버튼 등)</span>
+          </label>
+          <input
+            id="excludeSelector"
+            class="text-input mono-input"
+            type="text"
+            value=".toc, .header-link, .sidebar, script, style, .page__share, .page__meta, .page__taxonomy, ins, iframe"
+          />
+        </div>
+
+        <!-- Formatting Options -->
+        <div class="options-box">
+          <div class="options-title">⚙️ 네이버 스마트에디터 ONE 최적화 옵션</div>
+
+          <label class="toggle-row">
+            <span>구분선(<code>&lt;hr&gt;</code>) 제거 (높이 뻥튀기 방지)</span>
+            <input type="checkbox" id="optRemoveHr" checked />
+          </label>
+
+          <label class="toggle-row">
+            <span>소제목(<code>h1~h4</code>) 밑줄 제거 (네이버 강제 구분선 차단)</span>
+            <input type="checkbox" id="optStripHeaderBorder" checked />
+          </label>
+
+          <label class="toggle-row">
+            <span>코드 블록을 깨지지 않는 1칸 표(Table) 박스로 변환</span>
+            <input type="checkbox" id="optCodeToTable" checked />
+          </label>
+
+          <label class="toggle-row">
+            <span>인용구(<code>blockquote</code>)를 왼쪽 포인트 표로 변환</span>
+            <input type="checkbox" id="optQuoteToTable" checked />
+          </label>
+
+          <label class="toggle-row">
+            <span>목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거</span>
+            <input type="checkbox" id="optUnwrapLiP" checked />
+          </label>
+
+          <div class="toggle-row" style="margin-top:4px;">
+            <span>코드 블록 테마</span>
+            <select id="optCodeTheme" class="select-input" style="width:auto; padding:4px 10px; font-size:12.5px;">
+              <option value="light" selected>GitHub Light (#f6f8fa)</option>
+              <option value="dark">VS Code Dark (#1e293b)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Preview & Copy Panel -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="preview-toolbar">
+          <div class="panel-title">
+            <span>👁️ 네이버 블로그 붙여넣기 미리보기</span>
+          </div>
+          <div class="preview-stats">
+            <span id="statChars">0자</span>
+            <span>·</span>
+            <span id="statTables">표/코드박스 0개</span>
+          </div>
+        </div>
+
+        <div class="preview-toolbar">
+          <button class="btn-secondary" id="btnToggleSource" type="button">HTML 소스 보기</button>
+          <button class="btn-primary" id="btnCopyNaver" type="button">
+            📋 네이버 블로그용 복사하기
+          </button>
+        </div>
+      </div>
+
+      <!-- Visual Preview -->
+      <div class="preview-container" id="previewContainer">
+        <div class="preview-inner" id="previewOutput"></div>
+      </div>
+
+      <!-- Raw Clean HTML View -->
+      <pre class="html-source-view" id="htmlSourceOutput"></pre>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span>✅ 네이버 스마트에디터 맞춤형 서식으로 복사되었습니다! 에디터에 Ctrl+V 하세요.</span>
+  </div>
+
+  <script>
+    // State
+    let currentMode = 'url';
+    let rawHtmlBuffer = '';
+    let showHtmlSource = false;
+
+    // Elements
+    const targetSelectorInput = document.getElementById('targetSelector');
+    const excludeSelectorInput = document.getElementById('excludeSelector');
+    const sourceUrlInput = document.getElementById('sourceUrl');
+    const rawInputTextarea = document.getElementById('rawInput');
+    const fetchStatus = document.getElementById('fetchStatus');
+    const previewOutput = document.getElementById('previewOutput');
+    const previewContainer = document.getElementById('previewContainer');
+    const htmlSourceOutput = document.getElementById('htmlSourceOutput');
+    const statChars = document.getElementById('statChars');
+    const statTables = document.getElementById('statTables');
+    const bookmarkletLink = document.getElementById('bookmarkletLink');
+    const bmSelectorLabel = document.getElementById('bmSelectorLabel');
+
+    // Normalize user-entered class name or CSS selector
+    function normalizeSelector(input) {
+      const raw = (input || '').trim();
+      if (!raw) return '.page__content, article, body';
+      return raw
+        .split(',')
+        .map(part => {
+          const s = part.trim();
+          if (!s) return '';
+          // If it's a standard HTML tag name or already starts with ., #, [, return as is
+          const htmlTags = ['article', 'main', 'section', 'div', 'body', 'p', 'td'];
+          if (s.startsWith('.') || s.startsWith('#') || s.startsWith('[') || s.includes(' ') || s.includes('>') || htmlTags.includes(s.toLowerCase())) {
+            return s;
+          }
+          // Otherwise support both .className and #id or tag
+          return `.${s}, #${s}, ${s}`;
+        })
+        .filter(Boolean)
+        .join(', ');
+    }
+
+    // Strip YAML front matter from markdown
+    function stripFrontMatter(md) {
+      return md.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+    }
+
+    // Core DOM Sanitizer & Transformer for Naver SmartEditor ONE
+    function transformDomForNaver(sourceRoot, baseUrl = '') {
+      const clone = sourceRoot.cloneNode(true);
+
+      const removeHr = document.getElementById('optRemoveHr').checked;
+      const stripHeaderBorder = document.getElementById('optStripHeaderBorder').checked;
+      const codeToTable = document.getElementById('optCodeToTable').checked;
+      const quoteToTable = document.getElementById('optQuoteToTable').checked;
+      const unwrapLiP = document.getElementById('optUnwrapLiP').checked;
+      const codeTheme = document.getElementById('optCodeTheme').value;
+
+      // 1. Remove excluded selectors + optional <hr>
+      const excludeList = [];
+      if (removeHr) excludeList.push('hr');
+      if (excludeSelectorInput.value.trim()) {
+        excludeList.push(excludeSelectorInput.value.trim());
+      }
+      if (excludeList.length > 0) {
+        try {
+          clone.querySelectorAll(excludeList.join(', ')).forEach(el => el.remove());
+        } catch (err) {
+          console.warn('Invalid exclude selector ignored:', err);
+        }
+      }
+
+      // Convert relative image/link URLs to absolute if baseUrl is present
+      if (baseUrl) {
+        clone.querySelectorAll('img[src]').forEach(img => {
+          try {
+            img.setAttribute('src', new URL(img.getAttribute('src'), baseUrl).href);
+            img.setAttribute('style', 'max-width: 100%; height: auto; display: block; margin: 12px 0;');
+          } catch (_) {}
+        });
+        clone.querySelectorAll('a[href]').forEach(a => {
+          try {
+            const href = a.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+              a.setAttribute('href', new URL(href, baseUrl).href);
+            }
+          } catch (_) {}
+        });
+      }
+
+      // 2. Unwrap <p> inside <li>
+      if (unwrapLiP) {
+        clone.querySelectorAll('li > p').forEach(p => {
+          while (p.firstChild) p.parentNode.insertBefore(p.firstChild, p);
+          p.remove();
+        });
+      }
+
+      // 3. Headings (h1~h4): explicitly set border:none to block Naver's giant divider generation
+      clone.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+        const sizes = { H1: '22px', H2: '19px', H3: '17px', H4: '15px', H5: '14px', H6: '14px' };
+        h.removeAttribute('class');
+        h.removeAttribute('id');
+        const borderRule = stripHeaderBorder ? 'border: none; padding: 0;' : 'border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;';
+        h.setAttribute(
+          'style',
+          `font-size: ${sizes[h.tagName] || '18px'}; font-weight: bold; color: #111111; ${borderRule} margin: 18px 0 8px 0; line-height: 1.4;`
+        );
+      });
+
+      // 4. Code blocks (div.highlighter-rouge or standalone pre) -> 1x1 Table Box
+      if (codeToTable) {
+        const isDark = codeTheme === 'dark';
+        const bg = isDark ? '#1e293b' : '#f6f8fa';
+        const fg = isDark ? '#f8fafc' : '#24292e';
+        const borderCol = isDark ? '#334155' : '#e1e4e8';
+
+        // First handle Jekyll Rouge containers
+        clone.querySelectorAll('div.highlighter-rouge, figure.highlight').forEach(box => {
+          const codeText = box.innerText;
+          const table = createCodeTable(codeText, bg, fg, borderCol);
+          box.parentNode.replaceChild(table, box);
+        });
+
+        // Then handle remaining <pre> elements (e.g. from standard Markdown)
+        clone.querySelectorAll('pre').forEach(pre => {
+          if (!pre.parentNode) return;
+          const codeText = pre.innerText;
+          const table = createCodeTable(codeText, bg, fg, borderCol);
+          pre.parentNode.replaceChild(table, pre);
+        });
+      }
+
+      // 5. Inline <code> styling
+      clone.querySelectorAll('code').forEach(code => {
+        code.removeAttribute('class');
+        code.setAttribute(
+          'style',
+          'background-color: #f0f0f0; color: #d63384; padding: 2px 4px; font-family: Consolas, monospace; font-size: 90%;'
+        );
+      });
+
+      // 6. Blockquote -> 1x1 Table with left accent border
+      if (quoteToTable) {
+        clone.querySelectorAll('blockquote').forEach(bq => {
+          bq.querySelectorAll('p').forEach(p => {
+            while (p.firstChild) p.parentNode.insertBefore(p.firstChild, p);
+            p.remove();
+          });
+          const table = document.createElement('table');
+          table.setAttribute('cellspacing', '0');
+          table.setAttribute('cellpadding', '8');
+          table.setAttribute('style', 'width: 100%; border-collapse: collapse; margin: 8px 0;');
+          table.setAttribute('data-naver-custom', 'quote');
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.setAttribute(
+            'style',
+            'border-left: 4px solid #4a5568; background-color: #f8f9fa; padding: 8px 12px; color: #4a5568; line-height: 1.6;'
+          );
+          td.innerHTML = bq.innerHTML.trim();
+          tr.appendChild(td);
+          table.appendChild(tr);
+          bq.parentNode.replaceChild(table, bq);
+        });
+      }
+
+      // 7. Standard Tables -> Add border="1" and explicit cell borders
+      clone.querySelectorAll('table').forEach(table => {
+        if (table.getAttribute('data-naver-custom')) {
+          table.removeAttribute('data-naver-custom');
+          return;
+        }
+        table.setAttribute('border', '1');
+        table.setAttribute('cellspacing', '0');
+        table.setAttribute('cellpadding', '6');
+        table.setAttribute('style', 'width: 100%; border-collapse: collapse; border: 1px solid #cccccc; margin: 10px 0;');
+        table.querySelectorAll('th').forEach(th => {
+          th.setAttribute(
+            'style',
+            'background-color: #f2f2f2; border: 1px solid #cccccc; padding: 6px 8px; font-weight: bold; text-align: left; color: #222222;'
+          );
+        });
+        table.querySelectorAll('td').forEach(td => {
+          td.setAttribute('style', 'border: 1px solid #cccccc; padding: 6px 8px; color: #333333;');
+        });
+      });
+
+      // 8. Paragraphs & Lists
+      clone.querySelectorAll('p').forEach(p => {
+        p.removeAttribute('class');
+        p.setAttribute('style', 'font-size: 16px; line-height: 1.7; color: #333333; margin: 0 0 8px 0; border: none;');
+      });
+
+      clone.querySelectorAll('ul, ol').forEach(list => {
+        list.removeAttribute('class');
+        list.setAttribute('style', 'margin: 6px 0 12px 20px; padding: 0; color: #333333; line-height: 1.7;');
+      });
+
+      clone.querySelectorAll('li').forEach(li => {
+        li.removeAttribute('class');
+        li.setAttribute('style', 'margin-bottom: 4px; font-size: 16px; color: #333333;');
+      });
+
+      return clone;
+    }
+
+    function createCodeTable(codeText, bg, fg, borderCol) {
+      const table = document.createElement('table');
+      table.setAttribute('border', '1');
+      table.setAttribute('cellspacing', '0');
+      table.setAttribute('cellpadding', '10');
+      table.setAttribute(
+        'style',
+        `width: 100%; border-collapse: collapse; border: 1px solid ${borderCol}; background-color: ${bg}; margin: 8px 0;`
+      );
+      table.setAttribute('data-naver-custom', 'code');
+
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.setAttribute(
+        'style',
+        `background-color: ${bg}; border: 1px solid ${borderCol}; padding: 10px; font-family: Consolas, 'JetBrains Mono', monospace; font-size: 13px; color: ${fg}; white-space: pre-wrap; line-height: 1.5;`
+      );
+      td.innerText = codeText.trim();
+
+      tr.appendChild(td);
+      table.appendChild(tr);
+      return table;
+    }
+
+    // Render output to preview & source view
+    function updatePreview() {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtmlBuffer || '<div></div>', 'text/html');
+
+      const normalizedSel = normalizeSelector(targetSelectorInput.value);
+      let targetEl = null;
+      try {
+        targetEl = doc.querySelector(normalizedSel);
+      } catch (_) {}
+
+      if (!targetEl) {
+        targetEl = doc.body;
+      }
+
+      const baseUrl = currentMode === 'url' ? sourceUrlInput.value.trim() : '';
+      const cleanedDom = transformDomForNaver(targetEl, baseUrl);
+
+      previewOutput.innerHTML = cleanedDom.innerHTML;
+      htmlSourceOutput.textContent = cleanedDom.innerHTML;
+
+      // Update stats
+      const textLen = (cleanedDom.innerText || '').trim().length;
+      const tableCount = cleanedDom.querySelectorAll('table').length;
+      statChars.textContent = `${textLen.toLocaleString()}자`;
+      statTables.textContent = `표/코드박스 ${tableCount}개`;
+
+      updateBookmarklet();
+    }
+
+    // Generate dynamic bookmarklet based on current selector & options
+    function updateBookmarklet() {
+      const sel = normalizeSelector(targetSelectorInput.value).replace(/'/g, "\\'");
+      const excl = excludeSelectorInput.value.trim().replace(/'/g, "\\'");
+      bmSelectorLabel.textContent = targetSelectorInput.value.trim() || '.page__content';
+
+      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('영역 없음');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{bq.querySelectorAll('p').forEach(p=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});c.querySelectorAll('p').forEach(p=>{p.removeAttribute('class');p.setAttribute('style','font-size:16px;line-height:1.7;color:#333333;margin:0 0 8px 0;border:none;')});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('✅ 네이버 블로그용 복사 완료!');})();`;
+
+      bookmarkletLink.setAttribute('href', bmCode);
+    }
+
+    // Fetch remote URL (Direct fetch first, fallback to CORS proxy)
+    async function fetchUrlContent() {
+      const url = sourceUrlInput.value.trim();
+      if (!url) return;
+
+      fetchStatus.classList.remove('hidden', 'error');
+      fetchStatus.textContent = '⏳ 페이지 데이터를 불러오는 중입니다...';
+
+      try {
+        let htmlText = '';
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          htmlText = await res.text();
+        } catch (_) {
+          // Fallback to AllOrigins CORS proxy for cross-origin URLs
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+          const res = await fetch(proxyUrl);
+          if (!res.ok) throw new Error(`CORS 프록시 호출 실패 (${res.status})`);
+          htmlText = await res.text();
+        }
+
+        rawHtmlBuffer = htmlText;
+        updatePreview();
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const matched = doc.querySelector(normalizeSelector(targetSelectorInput.value));
+
+        if (matched) {
+          fetchStatus.textContent = `✅ '${targetSelectorInput.value}' 영역을 성공적으로 추출했습니다.`;
+        } else {
+          fetchStatus.textContent = `⚠️ '${targetSelectorInput.value}' 영역을 찾지 못해 전체 본문(body)을 불러왔습니다. 클래스명을 확인해 주세요.`;
+        }
+      } catch (err) {
+        fetchStatus.classList.add('error');
+        fetchStatus.textContent = `❌ 페이지를 불러오지 못했습니다: ${err.message}. 마크다운/HTML 직접 입력 탭을 이용해 주세요.`;
+      }
+    }
+
+    // Copy Clean HTML to Clipboard
+    function copyToNaverClipboard() {
+      const cleanHtml = previewOutput.innerHTML;
+      const cleanText = previewOutput.innerText;
+
+      if (!cleanText.trim()) {
+        alert('복사할 본문 내용이 없습니다.');
+        return;
+      }
+
+      const onCopy = (e) => {
+        e.clipboardData.setData('text/html', cleanHtml);
+        e.clipboardData.setData('text/plain', cleanText);
+        e.preventDefault();
+      };
+
+      document.addEventListener('copy', onCopy, { once: true });
+      document.execCommand('copy');
+
+      showToast('✅ 네이버 스마트에디터 맞춤형 서식으로 복사되었습니다! 에디터에 Ctrl+V 하세요.');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('span').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    // Load Sample Content
+    function loadSampleMarkdown() {
+      const sampleMd = `---
+title: "샘플 포스트 — 네이버 블로그 서식 테스트"
+---
+
+## 1. 소제목 밑줄 및 구분선 제거 테스트
+
+GitHub Pages(\`minimal-mistakes\`)의 \`<h2>\` 밑줄(\`border-bottom\`)이 제거되어 네이버 스마트에디터에서 거대한 구분선이 생성되지 않습니다.
+
+---
+
+## 2. 코드 블록 1칸 표(Table) 변환
+
+\`\`\`javascript
+function helloNaverBlog() {
+  const message = "코드 블록이 줄글로 풀리지 않고 표 박스로 유지됩니다!";
+  console.log(message);
+}
+\`\`\`
+
+## 3. 표(Table) 및 인용구 테스트
+
+| 기능 항목 | 기본 붙여넣기 | **MD2Naver 변환 후** |
+| :--- | :--- | :--- |
+| **소제목 밑줄** | 거대 구분선 생성됨 | **깔끔한 소제목 유지** |
+| **코드 블록** | 일반 텍스트로 풀림 | **1칸 표 박스로 보존** |
+| **목록 줄간격** | 2줄씩 벌어짐 | **딱 맞게 밀착** |
+
+> 💡 **인용구 테스트:** 인용구 역시 내부 \`<p>\` 태그를 제거하고 왼쪽 포인트 보더가 들어간 1칸 표로 변환되어 깨지지 않습니다.
+`;
+      rawInputTextarea.value = sampleMd;
+      const cleanedMd = stripFrontMatter(sampleMd);
+      rawHtmlBuffer = `<div class="page__content">${marked.parse(cleanedMd)}</div>`;
+      updatePreview();
+    }
+
+    // Event Listeners: Mode Tabs
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentMode = tab.dataset.mode;
+
+        document.getElementById('modeUrlSection').classList.toggle('hidden', currentMode !== 'url');
+        document.getElementById('modeMarkdownSection').classList.toggle('hidden', currentMode !== 'markdown');
+        document.getElementById('modeBookmarkletSection').classList.toggle('hidden', currentMode !== 'bookmarklet');
+
+        if (currentMode === 'markdown' && rawInputTextarea.value.trim()) {
+          const cleanedMd = stripFrontMatter(rawInputTextarea.value);
+          rawHtmlBuffer = `<div class="page__content">${marked.parse(cleanedMd)}</div>`;
+          updatePreview();
+        }
+      });
+    });
+
+    // Event Listeners: Selector Chips
+    document.querySelectorAll('#selectorChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#selectorChips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        targetSelectorInput.value = chip.dataset.selector;
+        updatePreview();
+      });
+    });
+
+    targetSelectorInput.addEventListener('input', updatePreview);
+    excludeSelectorInput.addEventListener('input', updatePreview);
+
+    // Options change listeners
+    ['optRemoveHr', 'optStripHeaderBorder', 'optCodeToTable', 'optQuoteToTable', 'optUnwrapLiP', 'optCodeTheme'].forEach(id => {
+      document.getElementById(id).addEventListener('change', updatePreview);
+    });
+
+    // Markdown input listener
+    rawInputTextarea.addEventListener('input', () => {
+      const text = rawInputTextarea.value;
+      const isHtml = /^\s*<[a-z][\s\S]*>/i.test(text);
+      if (isHtml) {
+        rawHtmlBuffer = text;
+      } else {
+        const cleanedMd = stripFrontMatter(text);
+        rawHtmlBuffer = `<div class="page__content">${marked.parse(cleanedMd)}</div>`;
+      }
+      updatePreview();
+    });
+
+    document.getElementById('btnFetchUrl').addEventListener('click', fetchUrlContent);
+    sourceUrlInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') fetchUrlContent();
+    });
+
+    document.getElementById('btnCopyNaver').addEventListener('click', copyToNaverClipboard);
+
+    document.getElementById('btnToggleSource').addEventListener('click', (e) => {
+      showHtmlSource = !showHtmlSource;
+      previewContainer.classList.toggle('hidden', showHtmlSource);
+      htmlSourceOutput.style.display = showHtmlSource ? 'block' : 'none';
+      e.currentTarget.textContent = showHtmlSource ? '미리보기 화면 보기' : 'HTML 소스 보기';
+    });
+
+    document.getElementById('btnLoadSample').addEventListener('click', () => {
+      document.querySelector('.mode-tab[data-mode="markdown"]').click();
+      loadSampleMarkdown();
+    });
+
+    document.getElementById('btnClearRaw').addEventListener('click', () => {
+      rawInputTextarea.value = '';
+      rawHtmlBuffer = '';
+      updatePreview();
+    });
+
+    document.getElementById('btnCopyBookmarkletCode').addEventListener('click', () => {
+      navigator.clipboard.writeText(bookmarkletLink.getAttribute('href'));
+      showToast('✅ 북마클릿 원라인 코드가 복사되었습니다! 북마크 URL에 붙여넣으세요.');
+    });
+
+    // Initialize with sample and auto-fetch if running on web
+    loadSampleMarkdown();
+    document.querySelector('.mode-tab[data-mode="url"]').click();
+    fetchUrlContent();
+  </script>
+</body>
+</html>
+
