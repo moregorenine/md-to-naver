@@ -29,6 +29,7 @@
     gtag('js', new Date());
     gtag('config', 'G-K9K30Q189F', { 'anonymize_ip': false });
   </script>
+
   <!-- Pretendard & JetBrains Mono Fonts -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,7 +135,38 @@
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--naver-green);
+      color: #ffffff;
     }
 
     .btn-ghost {
@@ -415,6 +447,7 @@
       color: var(--text-primary);
       cursor: pointer;
       user-select: none;
+      gap: 10px;
     }
 
     .toggle-row input[type="checkbox"] {
@@ -422,6 +455,7 @@
       width: 16px;
       height: 16px;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     /* Preview Area (Right Panel) */
@@ -560,12 +594,16 @@
       <div class="brand-logo">N</div>
       <div class="brand-title">
         MD2Naver Studio
-        <span class="badge">SmartEditor ONE 호환</span>
+        <span class="badge" data-i18n="badgeCompat">SmartEditor ONE 호환</span>
       </div>
     </div>
     <div class="topbar-actions">
-      <button class="btn-ghost" id="btnLoadSample" type="button">✨ 샘플 불러오기</button>
-      <a class="btn-ghost" href="https://moregorenine.github.io" target="_blank" rel="noopener">🏠 블로그 홈</a>
+      <div class="lang-switch" role="group" aria-label="Language Switcher">
+        <button type="button" class="lang-btn active" data-lang="ko">KO</button>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
+      <button class="btn-ghost" id="btnLoadSample" type="button" data-i18n="btnLoadSample">✨ 샘플 불러오기</button>
+      <a class="btn-ghost" href="https://moregorenine.github.io" target="_blank" rel="noopener" data-i18n="btnBlogHome">🏠 블로그 홈</a>
     </div>
   </header>
 
@@ -574,17 +612,17 @@
     <!-- Left Control Panel -->
     <section class="panel">
       <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" data-mode="url" type="button">🌐 웹 URL 추출</button>
-        <button class="mode-tab" data-mode="markdown" type="button">📝 마크다운 / HTML</button>
-        <button class="mode-tab" data-mode="bookmarklet" type="button">🔖 북마클릿 생성</button>
+        <button class="mode-tab active" data-mode="url" type="button" data-i18n="tabUrl">🌐 웹 URL 추출</button>
+        <button class="mode-tab" data-mode="markdown" type="button" data-i18n="tabMarkdown">📝 마크다운 / HTML</button>
+        <button class="mode-tab" data-mode="bookmarklet" type="button" data-i18n="tabBookmarklet">🔖 북마클릿 생성</button>
       </div>
 
       <div class="control-body">
         <!-- Common Target Selector Input (Always visible as requested) -->
         <div class="field-group">
           <label class="field-label" for="targetSelector">
-            <span>🎯 복사할 영역 클래스명 / CSS 선택자</span>
-            <span style="font-size:11px; color:var(--naver-green);">점(.) 생략 가능</span>
+            <span data-i18n="labelTargetSelector">🎯 복사할 영역 클래스명 / CSS 선택자</span>
+            <span style="font-size:11px; color:var(--naver-green);" data-i18n="labelDotOptional">점(.) 생략 가능</span>
           </label>
           <input
             id="targetSelector"
@@ -592,15 +630,16 @@
             type="text"
             value=".page__content"
             placeholder="예: .page__content 또는 page__content, article"
+            data-i18n-placeholder="placeholderTargetSelector"
           />
           <div class="chip-list" id="selectorChips">
-            <button type="button" class="chip active" data-selector=".page__content">Minimal Mistakes (.page__content)</button>
-            <button type="button" class="chip" data-selector="article">기본 태그 (article)</button>
-            <button type="button" class="chip" data-selector=".post-content, .entry-content">Jekyll 기본 (.post-content)</button>
-            <button type="button" class="chip" data-selector=".contents_style, .tt_article_useless_p_margin">티스토리 (.contents_style)</button>
-            <button type="button" class="chip" data-selector="main">전체 (main)</button>
+            <button type="button" class="chip active" data-selector=".page__content" data-i18n="chipMinimalMistakes">Minimal Mistakes (.page__content)</button>
+            <button type="button" class="chip" data-selector="article" data-i18n="chipArticle">기본 태그 (article)</button>
+            <button type="button" class="chip" data-selector=".post-content, .entry-content" data-i18n="chipJekyll">Jekyll 기본 (.post-content)</button>
+            <button type="button" class="chip" data-selector=".contents_style, .tt_article_useless_p_margin" data-i18n="chipTistory">티스토리 (.contents_style)</button>
+            <button type="button" class="chip" data-selector="main" data-i18n="chipMain">전체 (main)</button>
           </div>
-          <p class="field-hint">
+          <p class="field-hint" data-i18n-html="hintTargetSelector">
             클래스명만 입력해도(예: <code>page__content</code>) 자동으로 <code>.page__content</code>와 태그를 찾아 추출합니다.
           </p>
         </div>
@@ -608,7 +647,7 @@
         <!-- MODE 1: URL Fetch -->
         <div id="modeUrlSection" class="field-group">
           <label class="field-label" for="sourceUrl">
-            <span>🔗 가져올 웹페이지 URL</span>
+            <span data-i18n="labelSourceUrl">🔗 가져올 웹페이지 URL</span>
           </label>
           <div class="input-row">
             <input
@@ -617,10 +656,10 @@
               type="url"
               placeholder="https://moregorenine.github.io/..."
             />
-            <button class="btn-primary" id="btnFetchUrl" type="button">불러오기</button>
+            <button class="btn-primary" id="btnFetchUrl" type="button" data-i18n="btnFetchUrl">불러오기</button>
           </div>
           <div id="fetchStatus" class="status-banner hidden"></div>
-          <p class="field-hint">
+          <p class="field-hint" data-i18n-html="hintSourceUrl">
             GitHub Pages 포스트 주소를 입력하고 <strong>[불러오기]</strong>를 누르면 위에서 지정한 클래스 영역만 추출해 네이버 스마트에디터용으로 자동 세탁합니다.
           </p>
         </div>
@@ -628,13 +667,14 @@
         <!-- MODE 2: Markdown / HTML Direct Input -->
         <div id="modeMarkdownSection" class="field-group hidden">
           <label class="field-label" for="rawInput">
-            <span>📄 마크다운(.md) 또는 HTML 원문 붙여넣기</span>
-            <button class="btn-ghost" id="btnClearRaw" type="button" style="padding:2px 8px; font-size:11px;">비우기</button>
+            <span data-i18n="labelRawInput">📄 마크다운(.md) 또는 HTML 원문 붙여넣기</span>
+            <button class="btn-ghost" id="btnClearRaw" type="button" style="padding:2px 8px; font-size:11px;" data-i18n="btnClear">비우기</button>
           </label>
           <textarea
             id="rawInput"
             class="textarea-input mono-input"
             placeholder="여기에 마크다운(.md) 파일 내용이나 HTML 코드를 붙여넣으세요. 상단 YAML Front Matter(---)는 자동으로 제거됩니다."
+            data-i18n-placeholder="placeholderRawInput"
           ></textarea>
         </div>
 
@@ -642,14 +682,14 @@
         <div id="modeBookmarkletSection" class="field-group hidden">
           <div class="bookmarklet-box">
             <div style="font-size:13px; font-weight:700; color:var(--text-primary);">
-              🚀 현재 설정된 클래스명(<code id="bmSelectorLabel" style="color:var(--naver-green);">.page__content</code>) 전용 북마클릿
+              <span data-i18n="bmTitlePrefix">🚀 현재 설정된 클래스명(</span><code id="bmSelectorLabel" style="color:var(--naver-green);">.page__content</code><span data-i18n="bmTitleSuffix">) 전용 북마클릿</span>
             </div>
-            <p class="field-hint">
+            <p class="field-hint" data-i18n-html="hintBookmarklet">
               아래 초록색 버튼을 마우스로 끌어다가 크롬 상단 <strong>북마크 바(즐겨찾기 바)</strong>에 놓으세요. 어떤 블로그에서든 버튼 클릭 한 번으로 즉시 복사됩니다.
             </p>
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-              <a id="bookmarkletLink" class="bookmarklet-drag" href="#">📋 네이버 블로그 변환 복사</a>
-              <button class="btn-secondary" id="btnCopyBookmarkletCode" type="button">북마클릿 코드 복사</button>
+              <a id="bookmarkletLink" class="bookmarklet-drag" href="#" data-i18n="btnBookmarkletDrag">📋 네이버 블로그 변환 복사</a>
+              <button class="btn-secondary" id="btnCopyBookmarkletCode" type="button" data-i18n="btnCopyBookmarkletCode">북마클릿 코드 복사</button>
             </div>
           </div>
         </div>
@@ -657,7 +697,7 @@
         <!-- Exclude Selectors -->
         <div class="field-group">
           <label class="field-label" for="excludeSelector">
-            <span>🧹 제거할 불필요 요소 선택자 (목차, 공유버튼 등)</span>
+            <span data-i18n="labelExcludeSelector">🧹 제거할 불필요 요소 선택자 (목차, 공유버튼 등)</span>
           </label>
           <input
             id="excludeSelector"
@@ -669,40 +709,40 @@
 
         <!-- Formatting Options -->
         <div class="options-box">
-          <div class="options-title">⚙️ 네이버 스마트에디터 ONE 최적화 옵션</div>
+          <div class="options-title" data-i18n="optionsTitle">⚙️ 네이버 스마트에디터 ONE 최적화 옵션</div>
 
           <label class="toggle-row">
-            <span>구분선(<code>&lt;hr&gt;</code>) 제거 (높이 뻥튀기 방지)</span>
+            <span data-i18n-html="optRemoveHrLabel">구분선(<code>&lt;hr&gt;</code>) 제거 (높이 뻥튀기 방지)</span>
             <input type="checkbox" id="optRemoveHr" checked />
           </label>
 
           <label class="toggle-row">
-            <span>소제목(<code>h1~h4</code>) 밑줄 제거 (네이버 강제 구분선 차단)</span>
+            <span data-i18n-html="optStripHeaderBorderLabel">소제목(<code>h1~h4</code>) 밑줄 제거 (네이버 강제 구분선 차단)</span>
             <input type="checkbox" id="optStripHeaderBorder" checked />
           </label>
 
           <label class="toggle-row">
-            <span>코드 블록을 깨지지 않는 1칸 표(Table) 박스로 변환</span>
+            <span data-i18n-html="optCodeToTableLabel">코드 블록을 깨지지 않는 1칸 표(Table) 박스로 변환</span>
             <input type="checkbox" id="optCodeToTable" checked />
           </label>
 
           <label class="toggle-row">
-            <span>인용구(<code>blockquote</code>)를 왼쪽 포인트 표로 변환</span>
+            <span data-i18n-html="optQuoteToTableLabel">인용구(<code>blockquote</code>)를 왼쪽 포인트 표로 변환</span>
             <input type="checkbox" id="optQuoteToTable" checked />
           </label>
 
           <label class="toggle-row">
-            <span>목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거</span>
+            <span data-i18n-html="optUnwrapLiPLabel">목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거</span>
             <input type="checkbox" id="optUnwrapLiP" checked />
           </label>
 
           <label class="toggle-row">
-            <span>연속된 문단(<code>p + p</code>) 사이 빈 줄 삽입 (문단 분리)</span>
+            <span data-i18n-html="optParagraphSpacingLabel">연속된 문단(<code>p + p</code>) 사이 빈 줄 삽입 (문단 분리)</span>
             <input type="checkbox" id="optParagraphSpacing" checked />
           </label>
 
           <div class="toggle-row" style="margin-top:4px;">
-            <span>코드 블록 테마</span>
+            <span data-i18n="optCodeThemeLabel">코드 블록 테마</span>
             <select id="optCodeTheme" class="select-input" style="width:auto; padding:4px 10px; font-size:12.5px;">
               <option value="light" selected>GitHub Light (#f6f8fa)</option>
               <option value="dark">VS Code Dark (#1e293b)</option>
@@ -717,7 +757,7 @@
       <div class="panel-header">
         <div class="preview-toolbar">
           <div class="panel-title">
-            <span>👁️ 네이버 블로그 붙여넣기 미리보기</span>
+            <span data-i18n="previewTitle">👁️ 네이버 블로그 붙여넣기 미리보기</span>
           </div>
           <div class="preview-stats">
             <span id="statChars">0자</span>
@@ -728,7 +768,7 @@
 
         <div class="preview-toolbar">
           <button class="btn-secondary" id="btnToggleSource" type="button">HTML 소스 보기</button>
-          <button class="btn-primary" id="btnCopyNaver" type="button">
+          <button class="btn-primary" id="btnCopyNaver" type="button" data-i18n="btnCopyNaver">
             📋 네이버 블로그용 복사하기
           </button>
         </div>
@@ -750,10 +790,197 @@
   </div>
 
   <script>
+    // i18n Dictionary (Korean & English)
+    const I18N = {
+      ko: {
+        pageTitle: 'MD2Naver — GitHub Pages & 마크다운 네이버 블로그 서식 변환기',
+        badgeCompat: 'SmartEditor ONE 호환',
+        btnLoadSample: '✨ 샘플 불러오기',
+        btnBlogHome: '🏠 블로그 홈',
+        tabUrl: '🌐 웹 URL 추출',
+        tabMarkdown: '📝 마크다운 / HTML',
+        tabBookmarklet: '🔖 북마클릿 생성',
+        labelTargetSelector: '🎯 복사할 영역 클래스명 / CSS 선택자',
+        labelDotOptional: '점(.) 생략 가능',
+        placeholderTargetSelector: '예: .page__content 또는 page__content, article',
+        chipMinimalMistakes: 'Minimal Mistakes (.page__content)',
+        chipArticle: '기본 태그 (article)',
+        chipJekyll: 'Jekyll 기본 (.post-content)',
+        chipTistory: '티스토리 (.contents_style)',
+        chipMain: '전체 (main)',
+        hintTargetSelector: '클래스명만 입력해도(예: <code>page__content</code>) 자동으로 <code>.page__content</code>와 태그를 찾아 추출합니다.',
+        labelSourceUrl: '🔗 가져올 웹페이지 URL',
+        btnFetchUrl: '불러오기',
+        hintSourceUrl: 'GitHub Pages 포스트 주소를 입력하고 <strong>[불러오기]</strong>를 누르면 위에서 지정한 클래스 영역만 추출해 네이버 스마트에디터용으로 자동 세탁합니다.',
+        labelRawInput: '📄 마크다운(.md) 또는 HTML 원문 붙여넣기',
+        btnClear: '비우기',
+        placeholderRawInput: '여기에 마크다운(.md) 파일 내용이나 HTML 코드를 붙여넣으세요. 상단 YAML Front Matter(---)는 자동으로 제거됩니다.',
+        bmTitlePrefix: '🚀 현재 설정된 클래스명(',
+        bmTitleSuffix: ') 전용 북마클릿',
+        hintBookmarklet: '아래 초록색 버튼을 마우스로 끌어다가 크롬 상단 <strong>북마크 바(즐겨찾기 바)</strong>에 놓으세요. 어떤 블로그에서든 버튼 클릭 한 번으로 즉시 복사됩니다.',
+        btnBookmarkletDrag: '📋 네이버 블로그 변환 복사',
+        btnCopyBookmarkletCode: '북마클릿 코드 복사',
+        labelExcludeSelector: '🧹 제거할 불필요 요소 선택자 (목차, 공유버튼 등)',
+        optionsTitle: '⚙️ 네이버 스마트에디터 ONE 최적화 옵션',
+        optRemoveHrLabel: '구분선(<code>&lt;hr&gt;</code>) 제거 (높이 뻥튀기 방지)',
+        optStripHeaderBorderLabel: '소제목(<code>h1~h4</code>) 밑줄 제거 (네이버 강제 구분선 차단)',
+        optCodeToTableLabel: '코드 블록을 깨지지 않는 1칸 표(Table) 박스로 변환',
+        optQuoteToTableLabel: '인용구(<code>blockquote</code>)를 왼쪽 포인트 표로 변환',
+        optUnwrapLiPLabel: '목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거',
+        optParagraphSpacingLabel: '연속된 문단(<code>p + p</code>) 사이 빈 줄 삽입 (문단 분리)',
+        optCodeThemeLabel: '코드 블록 테마',
+        previewTitle: '👁️ 네이버 블로그 붙여넣기 미리보기',
+        btnShowSource: 'HTML 소스 보기',
+        btnShowPreview: '미리보기 화면 보기',
+        btnCopyNaver: '📋 네이버 블로그용 복사하기',
+        statChars: (n) => `${n.toLocaleString()}자`,
+        statTables: (n) => `표/코드박스 ${n}개`,
+        statusLoading: '⏳ 페이지 데이터를 불러오는 중입니다...',
+        statusMatched: (sel) => `✅ '${sel}' 영역을 성공적으로 추출했습니다.`,
+        statusFallback: (sel) => `⚠️ '${sel}' 영역을 찾지 못해 전체 본문(body)을 불러왔습니다. 클래스명을 확인해 주세요.`,
+        statusError: (msg) => `❌ 페이지를 불러오지 못했습니다: ${msg}. 마크다운/HTML 직접 입력 탭을 이용해 주세요.`,
+        proxyError: (status) => `CORS 프록시 호출 실패 (${status})`,
+        alertEmptyCopy: '복사할 본문 내용이 없습니다.',
+        toastCopiedNaver: '✅ 네이버 스마트에디터 맞춤형 서식으로 복사되었습니다! 에디터에 Ctrl+V 하세요.',
+        toastCopiedBm: '✅ 북마클릿 원라인 코드가 복사되었습니다! 북마크 URL에 붙여넣으세요.',
+        bmAlertNotFound: '영역 없음',
+        bmAlertCopied: '✅ 네이버 블로그용 복사 완료!',
+        sampleMd: `---
+title: "샘플 포스트 — 네이버 블로그 서식 테스트"
+---
+
+## 1. 소제목 밑줄 및 문단 분리 테스트
+
+GitHub Pages(\`minimal-mistakes\`)의 \`<h2>\` 밑줄(\`border-bottom\`)이 제거되어 네이버 스마트에디터에서 거대한 구분선이 생성되지 않습니다.
+
+연속된 \`<p>\` 태그가 나올 때도 스마트에디터가 \`margin\`을 무시하여 문단이 다닥다닥 붙어버리는 문제를 방지하기 위해 문단 사이에 빈 줄(\`<p><br></p>\`)이 자동으로 삽입됩니다.
+
+---
+
+## 2. 코드 블록 1칸 표(Table) 변환
+
+\`\`\`javascript
+function helloNaverBlog() {
+  const message = "코드 블록이 줄글로 풀리지 않고 표 박스로 유지됩니다!";
+  console.log(message);
+}
+\`\`\`
+
+## 3. 표(Table) 및 인용구 테스트
+
+| 기능 항목 | 기본 붙여넣기 | **MD2Naver 변환 후** |
+| :--- | :--- | :--- |
+| **소제목 밑줄** | 거대 구분선 생성됨 | **깔끔한 소제목 유지** |
+| **연속 문단(p+p)** | 빈 줄 없이 다닥다닥 붙음 | **문단 사이 빈 줄 자동 분리** |
+| **코드 블록** | 일반 텍스트로 풀림 | **1칸 표 박스로 보존** |
+| **목록 줄간격** | 2줄씩 벌어짐 | **딱 맞게 밀착** |
+
+> 💡 **인용구 테스트:** 인용구 역시 내부 \`<p>\` 태그를 정리하고 왼쪽 포인트 보더가 들어간 1칸 표로 변환되어 깨지지 않습니다.
+`
+      },
+      en: {
+        pageTitle: 'MD2Naver — GitHub Pages & Markdown to Naver Blog Converter',
+        badgeCompat: 'SmartEditor ONE Ready',
+        btnLoadSample: '✨ Load Sample',
+        btnBlogHome: '🏠 Blog Home',
+        tabUrl: '🌐 Extract URL',
+        tabMarkdown: '📝 Markdown / HTML',
+        tabBookmarklet: '🔖 Bookmarklet',
+        labelTargetSelector: '🎯 Target Class Name / CSS Selector',
+        labelDotOptional: 'Dot (.) optional',
+        placeholderTargetSelector: 'e.g., .page__content or page__content, article',
+        chipMinimalMistakes: 'Minimal Mistakes (.page__content)',
+        chipArticle: 'Article Tag (article)',
+        chipJekyll: 'Jekyll Default (.post-content)',
+        chipTistory: 'Tistory (.contents_style)',
+        chipMain: 'Main Tag (main)',
+        hintTargetSelector: 'Enter a class name (e.g., <code>page__content</code>) and it will automatically match <code>.page__content</code>, ID, or tag.',
+        labelSourceUrl: '🔗 Source Webpage URL',
+        btnFetchUrl: 'Fetch',
+        hintSourceUrl: 'Enter a GitHub Pages post URL and click <strong>[Fetch]</strong> to extract the target container and sanitize it for Naver SmartEditor ONE.',
+        labelRawInput: '📄 Paste Raw Markdown (.md) or HTML',
+        btnClear: 'Clear',
+        placeholderRawInput: 'Paste your Markdown (.md) or HTML source here. YAML Front Matter (---) at the top is automatically stripped.',
+        bmTitlePrefix: '🚀 Bookmarklet for (',
+        bmTitleSuffix: ')',
+        hintBookmarklet: 'Drag the green button below to your browser\'s <strong>Bookmarks Bar</strong>. Click it on any blog post to convert and copy in one click.',
+        btnBookmarkletDrag: '📋 Copy for Naver Blog',
+        btnCopyBookmarkletCode: 'Copy Bookmarklet Code',
+        labelExcludeSelector: '🧹 Exclude Selectors (TOC, share buttons, ads, etc.)',
+        optionsTitle: '⚙️ Naver SmartEditor ONE Optimization Options',
+        optRemoveHrLabel: 'Remove <code>&lt;hr&gt;</code> dividers (prevent giant spacing)',
+        optStripHeaderBorderLabel: 'Strip heading (<code>h1~h4</code>) bottom borders (block forced dividers)',
+        optCodeToTableLabel: 'Convert code blocks into 1x1 Table boxes',
+        optQuoteToTableLabel: 'Convert <code>blockquote</code> into left-accented Table boxes',
+        optUnwrapLiPLabel: 'Unwrap <code>li &gt; p</code> tags (fix double line-spacing in lists)',
+        optParagraphSpacingLabel: 'Insert blank line between consecutive paragraphs (<code>p + p</code>)',
+        optCodeThemeLabel: 'Code Block Theme',
+        previewTitle: '👁️ Naver Blog Paste Preview',
+        btnShowSource: 'View HTML Source',
+        btnShowPreview: 'View Visual Preview',
+        btnCopyNaver: '📋 Copy for Naver Blog',
+        statChars: (n) => `${n.toLocaleString()} chars`,
+        statTables: (n) => `${n} tables/boxes`,
+        statusLoading: '⏳ Fetching webpage content...',
+        statusMatched: (sel) => `✅ Successfully extracted '${sel}'.`,
+        statusFallback: (sel) => `⚠️ Could not find '${sel}', loaded full body instead. Please check the selector.`,
+        statusError: (msg) => `❌ Failed to fetch page: ${msg}. Please use the Markdown / HTML tab instead.`,
+        proxyError: (status) => `CORS proxy request failed (${status})`,
+        alertEmptyCopy: 'No content available to copy.',
+        toastCopiedNaver: '✅ Copied in Naver SmartEditor format! Press Ctrl+V in the editor.',
+        toastCopiedBm: '✅ Bookmarklet code copied! Paste it into a bookmark URL.',
+        bmAlertNotFound: 'Target container not found',
+        bmAlertCopied: '✅ Copied for Naver Blog!',
+        sampleMd: `---
+title: "Sample Post — Naver Blog Formatting Test"
+---
+
+## 1. Heading Border Removal & Paragraph Separation
+
+The bottom border (\`border-bottom\`) on \`<h2>\` in GitHub Pages (\`minimal-mistakes\`) is stripped so Naver SmartEditor ONE won't insert giant horizontal dividers.
+
+When consecutive \`<p>\` tags appear, an explicit blank paragraph (\`<p><br></p>\`) is inserted between them so Naver SmartEditor ONE separates paragraphs cleanly instead of collapsing their margins.
+
+---
+
+## 2. Code Block to 1x1 Table Box
+
+\`\`\`javascript
+function helloNaverBlog() {
+  const message = "Code blocks stay intact inside a 1x1 table box!";
+  console.log(message);
+}
+\`\`\`
+
+## 3. Table & Blockquote Test
+
+| Feature | Default Paste | **With MD2Naver** |
+| :--- | :--- | :--- |
+| **Heading Borders** | Giant divider line | **Clean heading** |
+| **Paragraphs (p+p)** | Collapsed together | **Separated with blank line** |
+| **Code Blocks** | Flattened into plain text | **Preserved in 1x1 table** |
+| **List Spacing** | Double-spaced items | **Compact list items** |
+
+> 💡 **Blockquote Test:** Blockquotes are converted into a 1x1 table with a left accent border so they never break when pasted into Naver Blog.
+`
+      }
+    };
+
     // State
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    let currentLang = (urlLang === 'en' || urlLang === 'ko')
+      ? urlLang
+      : (localStorage.getItem('md2naver_lang') || 'ko');
     let currentMode = 'url';
     let rawHtmlBuffer = '';
     let showHtmlSource = false;
+    let lastFetchState = null; // { type: 'loading'|'matched'|'fallback'|'error', arg: string }
+
+    function t(key, ...args) {
+      const dict = I18N[currentLang] || I18N.ko;
+      const val = dict[key] !== undefined ? dict[key] : I18N.ko[key];
+      return typeof val === 'function' ? val(...args) : val;
+    }
 
     // Elements
     const targetSelectorInput = document.getElementById('targetSelector');
@@ -768,6 +995,63 @@
     const statTables = document.getElementById('statTables');
     const bookmarkletLink = document.getElementById('bookmarkletLink');
     const bmSelectorLabel = document.getElementById('bmSelectorLabel');
+    const btnToggleSource = document.getElementById('btnToggleSource');
+
+    // Apply language to DOM
+    function applyLanguage(lang) {
+      currentLang = I18N[lang] ? lang : 'ko';
+      localStorage.setItem('md2naver_lang', currentLang);
+      document.documentElement.lang = currentLang;
+      document.title = t('pageTitle');
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+      });
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+      });
+
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        el.innerHTML = t(key);
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.setAttribute('placeholder', t(key));
+      });
+
+      btnToggleSource.textContent = showHtmlSource ? t('btnShowPreview') : t('btnShowSource');
+
+      if (lastFetchState && !fetchStatus.classList.contains('hidden')) {
+        renderFetchStatus();
+      }
+
+      // If rawInput contains one of the default samples, switch sample language too
+      const curRaw = rawInputTextarea.value.trim();
+      if (curRaw === I18N.ko.sampleMd.trim() || curRaw === I18N.en.sampleMd.trim()) {
+        loadSampleMarkdown();
+      } else {
+        updatePreview();
+      }
+    }
+
+    function renderFetchStatus() {
+      if (!lastFetchState) return;
+      fetchStatus.classList.remove('hidden', 'error');
+      if (lastFetchState.type === 'loading') {
+        fetchStatus.textContent = t('statusLoading');
+      } else if (lastFetchState.type === 'matched') {
+        fetchStatus.textContent = t('statusMatched', lastFetchState.arg);
+      } else if (lastFetchState.type === 'fallback') {
+        fetchStatus.textContent = t('statusFallback', lastFetchState.arg);
+      } else if (lastFetchState.type === 'error') {
+        fetchStatus.classList.add('error');
+        fetchStatus.textContent = t('statusError', lastFetchState.arg);
+      }
+    }
 
     // Normalize user-entered class name or CSS selector
     function normalizeSelector(input) {
@@ -778,12 +1062,10 @@
         .map(part => {
           const s = part.trim();
           if (!s) return '';
-          // If it's a standard HTML tag name or already starts with ., #, [, return as is
           const htmlTags = ['article', 'main', 'section', 'div', 'body', 'p', 'td'];
           if (s.startsWith('.') || s.startsWith('#') || s.startsWith('[') || s.includes(' ') || s.includes('>') || htmlTags.includes(s.toLowerCase())) {
             return s;
           }
-          // Otherwise support both .className and #id or tag
           return `.${s}, #${s}, ${s}`;
         })
         .filter(Boolean)
@@ -1034,8 +1316,8 @@
       // Update stats
       const textLen = (cleanedDom.innerText || '').trim().length;
       const tableCount = cleanedDom.querySelectorAll('table').length;
-      statChars.textContent = `${textLen.toLocaleString()}자`;
-      statTables.textContent = `표/코드박스 ${tableCount}개`;
+      statChars.textContent = t('statChars', textLen);
+      statTables.textContent = t('statTables', tableCount);
 
       updateBookmarklet();
     }
@@ -1046,7 +1328,10 @@
       const excl = excludeSelectorInput.value.trim().replace(/'/g, "\\'");
       bmSelectorLabel.textContent = targetSelectorInput.value.trim() || '.page__content';
 
-      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('영역 없음');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{const n=p.nextElementSibling&&p.nextElementSibling.tagName==='P';while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(n)p.parentNode.insertBefore(document.createElement('br'),p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{const ps=Array.from(bq.querySelectorAll('p'));ps.forEach((p,i)=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(i<ps.length-1){p.parentNode.insertBefore(document.createElement('br'),p);p.parentNode.insertBefore(document.createElement('br'),p)}p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});const ps='font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;';Array.from(c.querySelectorAll('p')).forEach(p=>{p.removeAttribute('class');p.setAttribute('style',ps);const nx=p.nextElementSibling;if(nx&&nx.tagName==='P'&&(p.textContent.trim()||p.querySelector('img'))){const sp=document.createElement('p');sp.setAttribute('style',ps);sp.innerHTML='<br>';p.parentNode.insertBefore(sp,nx)}});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('✅ 네이버 블로그용 복사 완료!');})();`;
+      const msgNotFound = t('bmAlertNotFound').replace(/'/g, "\\'");
+      const msgCopied = t('bmAlertCopied').replace(/'/g, "\\'");
+
+      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('${msgNotFound}');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{const n=p.nextElementSibling&&p.nextElementSibling.tagName==='P';while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(n)p.parentNode.insertBefore(document.createElement('br'),p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{const ps=Array.from(bq.querySelectorAll('p'));ps.forEach((p,i)=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(i<ps.length-1){p.parentNode.insertBefore(document.createElement('br'),p);p.parentNode.insertBefore(document.createElement('br'),p)}p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});const ps='font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;';Array.from(c.querySelectorAll('p')).forEach(p=>{p.removeAttribute('class');p.setAttribute('style',ps);const nx=p.nextElementSibling;if(nx&&nx.tagName==='P'&&(p.textContent.trim()||p.querySelector('img'))){const sp=document.createElement('p');sp.setAttribute('style',ps);sp.innerHTML='<br>';p.parentNode.insertBefore(sp,nx)}});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('${msgCopied}');})();`;
 
       bookmarkletLink.setAttribute('href', bmCode);
     }
@@ -1056,8 +1341,8 @@
       const url = sourceUrlInput.value.trim();
       if (!url) return;
 
-      fetchStatus.classList.remove('hidden', 'error');
-      fetchStatus.textContent = '⏳ 페이지 데이터를 불러오는 중입니다...';
+      lastFetchState = { type: 'loading' };
+      renderFetchStatus();
 
       try {
         let htmlText = '';
@@ -1069,7 +1354,7 @@
           // Fallback to AllOrigins CORS proxy for cross-origin URLs
           const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
           const res = await fetch(proxyUrl);
-          if (!res.ok) throw new Error(`CORS 프록시 호출 실패 (${res.status})`);
+          if (!res.ok) throw new Error(t('proxyError', res.status));
           htmlText = await res.text();
         }
 
@@ -1081,13 +1366,14 @@
         const matched = doc.querySelector(normalizeSelector(targetSelectorInput.value));
 
         if (matched) {
-          fetchStatus.textContent = `✅ '${targetSelectorInput.value}' 영역을 성공적으로 추출했습니다.`;
+          lastFetchState = { type: 'matched', arg: targetSelectorInput.value };
         } else {
-          fetchStatus.textContent = `⚠️ '${targetSelectorInput.value}' 영역을 찾지 못해 전체 본문(body)을 불러왔습니다. 클래스명을 확인해 주세요.`;
+          lastFetchState = { type: 'fallback', arg: targetSelectorInput.value };
         }
+        renderFetchStatus();
       } catch (err) {
-        fetchStatus.classList.add('error');
-        fetchStatus.textContent = `❌ 페이지를 불러오지 못했습니다: ${err.message}. 마크다운/HTML 직접 입력 탭을 이용해 주세요.`;
+        lastFetchState = { type: 'error', arg: err.message };
+        renderFetchStatus();
       }
     }
 
@@ -1097,7 +1383,7 @@
       const cleanText = previewOutput.innerText;
 
       if (!cleanText.trim()) {
-        alert('복사할 본문 내용이 없습니다.');
+        alert(t('alertEmptyCopy'));
         return;
       }
 
@@ -1110,7 +1396,7 @@
       document.addEventListener('copy', onCopy, { once: true });
       document.execCommand('copy');
 
-      showToast('✅ 네이버 스마트에디터 맞춤형 서식으로 복사되었습니다! 에디터에 Ctrl+V 하세요.');
+      showToast(t('toastCopiedNaver'));
     }
 
     function showToast(msg) {
@@ -1122,43 +1408,19 @@
 
     // Load Sample Content
     function loadSampleMarkdown() {
-      const sampleMd = `---
-title: "샘플 포스트 — 네이버 블로그 서식 테스트"
----
-
-## 1. 소제목 밑줄 및 문단 분리 테스트
-
-GitHub Pages(\`minimal-mistakes\`)의 \`<h2>\` 밑줄(\`border-bottom\`)이 제거되어 네이버 스마트에디터에서 거대한 구분선이 생성되지 않습니다.
-
-연속된 \`<p>\` 태그가 나올 때도 스마트에디터가 \`margin\`을 무시하여 문단이 다닥다닥 붙어버리는 문제를 방지하기 위해 문단 사이에 빈 줄(\`<p><br></p>\`)이 자동으로 삽입됩니다.
-
----
-
-## 2. 코드 블록 1칸 표(Table) 변환
-
-\`\`\`javascript
-function helloNaverBlog() {
-  const message = "코드 블록이 줄글로 풀리지 않고 표 박스로 유지됩니다!";
-  console.log(message);
-}
-\`\`\`
-
-## 3. 표(Table) 및 인용구 테스트
-
-| 기능 항목 | 기본 붙여넣기 | **MD2Naver 변환 후** |
-| :--- | :--- | :--- |
-| **소제목 밑줄** | 거대 구분선 생성됨 | **깔끔한 소제목 유지** |
-| **연속 문단(p+p)** | 빈 줄 없이 다닥다닥 붙음 | **문단 사이 빈 줄 자동 분리** |
-| **코드 블록** | 일반 텍스트로 풀림 | **1칸 표 박스로 보존** |
-| **목록 줄간격** | 2줄씩 벌어짐 | **딱 맞게 밀착** |
-
-> 💡 **인용구 테스트:** 인용구 역시 내부 \`<p>\` 태그를 정리하고 왼쪽 포인트 보더가 들어간 1칸 표로 변환되어 깨지지 않습니다.
-`;
+      const sampleMd = t('sampleMd');
       rawInputTextarea.value = sampleMd;
       const cleanedMd = stripFrontMatter(sampleMd);
       rawHtmlBuffer = `<div class="page__content">${marked.parse(cleanedMd)}</div>`;
       updatePreview();
     }
+
+    // Event Listeners: Language Switcher
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyLanguage(btn.dataset.lang);
+      });
+    });
 
     // Event Listeners: Mode Tabs
     document.querySelectorAll('.mode-tab').forEach(tab => {
@@ -1217,11 +1479,11 @@ function helloNaverBlog() {
 
     document.getElementById('btnCopyNaver').addEventListener('click', copyToNaverClipboard);
 
-    document.getElementById('btnToggleSource').addEventListener('click', (e) => {
+    btnToggleSource.addEventListener('click', () => {
       showHtmlSource = !showHtmlSource;
       previewContainer.classList.toggle('hidden', showHtmlSource);
       htmlSourceOutput.style.display = showHtmlSource ? 'block' : 'none';
-      e.currentTarget.textContent = showHtmlSource ? '미리보기 화면 보기' : 'HTML 소스 보기';
+      btnToggleSource.textContent = showHtmlSource ? t('btnShowPreview') : t('btnShowSource');
     });
 
     document.getElementById('btnLoadSample').addEventListener('click', () => {
@@ -1237,14 +1499,14 @@ function helloNaverBlog() {
 
     document.getElementById('btnCopyBookmarkletCode').addEventListener('click', () => {
       navigator.clipboard.writeText(bookmarkletLink.getAttribute('href'));
-      showToast('✅ 북마클릿 원라인 코드가 복사되었습니다! 북마크 URL에 붙여넣으세요.');
+      showToast(t('toastCopiedBm'));
     });
 
-    // Initialize with sample and auto-fetch if running on web
+    // Initialize with saved/URL language and sample
+    applyLanguage(currentLang);
     loadSampleMarkdown();
     document.querySelector('.mode-tab[data-mode="url"]').click();
     fetchUrlContent();
   </script>
 </body>
 </html>
-
