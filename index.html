@@ -741,6 +741,11 @@
             <input type="checkbox" id="optParagraphSpacing" checked />
           </label>
 
+          <label class="toggle-row">
+            <span data-i18n-html="optHeadingSpacingLabel">제목(<code>#</code>, <code>##</code>) 다음 줄 빈 줄(<code>&lt;br&gt;</code>) 삽입</span>
+            <input type="checkbox" id="optHeadingSpacing" checked />
+          </label>
+
           <div class="toggle-row" style="margin-top:4px;">
             <span data-i18n="optCodeThemeLabel">코드 블록 테마</span>
             <select id="optCodeTheme" class="select-input" style="width:auto; padding:4px 10px; font-size:12.5px;">
@@ -828,6 +833,7 @@
         optQuoteToTableLabel: '인용구(<code>blockquote</code>)를 왼쪽 포인트 표로 변환',
         optUnwrapLiPLabel: '목록(<code>li &gt; p</code>) 내부 불필요 줄바꿈 제거',
         optParagraphSpacingLabel: '연속된 문단(<code>p + p</code>) 사이 빈 줄 삽입 (문단 분리)',
+        optHeadingSpacingLabel: '제목(<code>#</code>, <code>##</code>) 다음 줄 빈 줄(<code>&lt;br&gt;</code>) 삽입',
         optCodeThemeLabel: '코드 블록 테마',
         previewTitle: '👁️ 네이버 블로그 붙여넣기 미리보기',
         btnShowSource: 'HTML 소스 보기',
@@ -914,6 +920,7 @@ function helloNaverBlog() {
         optQuoteToTableLabel: 'Convert <code>blockquote</code> into left-accented Table boxes',
         optUnwrapLiPLabel: 'Unwrap <code>li &gt; p</code> tags (fix double line-spacing in lists)',
         optParagraphSpacingLabel: 'Insert blank line between consecutive paragraphs (<code>p + p</code>)',
+        optHeadingSpacingLabel: 'Insert blank line (<code>&lt;br&gt;</code>) after headings (<code>#</code>, <code>##</code>)',
         optCodeThemeLabel: 'Code Block Theme',
         previewTitle: '👁️ Naver Blog Paste Preview',
         btnShowSource: 'View HTML Source',
@@ -1087,6 +1094,7 @@ function helloNaverBlog() {
       const quoteToTable = document.getElementById('optQuoteToTable').checked;
       const unwrapLiP = document.getElementById('optUnwrapLiP').checked;
       const paragraphSpacing = document.getElementById('optParagraphSpacing').checked;
+      const headingSpacing = document.getElementById('optHeadingSpacing').checked;
       const codeTheme = document.getElementById('optCodeTheme').value;
 
       // 1. Remove excluded selectors + optional <hr>
@@ -1134,15 +1142,26 @@ function helloNaverBlog() {
       }
 
       // 3. Headings (h1~h4): explicitly set border:none to block Naver's giant divider generation
-      clone.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+      Array.from(clone.querySelectorAll('h1, h2, h3, h4, h5, h6')).forEach(h => {
         const sizes = { H1: '22px', H2: '19px', H3: '17px', H4: '15px', H5: '14px', H6: '14px' };
         h.removeAttribute('class');
         h.removeAttribute('id');
         const borderRule = stripHeaderBorder ? 'border: none; padding: 0;' : 'border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;';
+        const bottomMargin = headingSpacing ? '0' : '8px';
         h.setAttribute(
           'style',
-          `font-size: ${sizes[h.tagName] || '18px'}; font-weight: bold; color: #111111; ${borderRule} margin: 18px 0 8px 0; line-height: 1.4;`
+          `font-size: ${sizes[h.tagName] || '18px'}; font-weight: bold; color: #111111; ${borderRule} margin: 18px 0 ${bottomMargin} 0; line-height: 1.4;`
         );
+        if (headingSpacing && h.parentNode) {
+          const nextEl = h.nextElementSibling;
+          const isNextAlreadyEmptyP = nextEl && nextEl.tagName === 'P' && !nextEl.textContent.trim() && !nextEl.querySelector('img, iframe, video');
+          if (!isNextAlreadyEmptyP) {
+            const spacerP = document.createElement('p');
+            spacerP.setAttribute('style', 'font-size: 16px; line-height: 1.7; color: #333333; margin: 0; border: none;');
+            spacerP.innerHTML = '<br>';
+            h.parentNode.insertBefore(spacerP, h.nextSibling);
+          }
+        }
       });
 
       // 4. Code blocks (div.highlighter-rouge or standalone pre) -> 1x1 Table Box
@@ -1330,8 +1349,9 @@ function helloNaverBlog() {
 
       const msgNotFound = t('bmAlertNotFound').replace(/'/g, "\\'");
       const msgCopied = t('bmAlertCopied').replace(/'/g, "\\'");
+      const hSpace = document.getElementById('optHeadingSpacing').checked;
 
-      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('${msgNotFound}');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{const n=p.nextElementSibling&&p.nextElementSibling.tagName==='P';while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(n)p.parentNode.insertBefore(document.createElement('br'),p);p.remove()});c.querySelectorAll('h1,h2,h3,h4').forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 8px 0;')});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{const ps=Array.from(bq.querySelectorAll('p'));ps.forEach((p,i)=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(i<ps.length-1){p.parentNode.insertBefore(document.createElement('br'),p);p.parentNode.insertBefore(document.createElement('br'),p)}p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});const ps='font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;';Array.from(c.querySelectorAll('p')).forEach(p=>{p.removeAttribute('class');p.setAttribute('style',ps);const nx=p.nextElementSibling;if(nx&&nx.tagName==='P'&&(p.textContent.trim()||p.querySelector('img'))){const sp=document.createElement('p');sp.setAttribute('style',ps);sp.innerHTML='<br>';p.parentNode.insertBefore(sp,nx)}});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('${msgCopied}');})();`;
+      const bmCode = `javascript:(function(){const t=document.querySelector('${sel}')||document.querySelector('article')||document.body;if(!t)return alert('${msgNotFound}');const c=t.cloneNode(true);c.querySelectorAll('hr,${excl}').forEach(e=>e.remove());c.querySelectorAll('li>p').forEach(p=>{const n=p.nextElementSibling&&p.nextElementSibling.tagName==='P';while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(n)p.parentNode.insertBefore(document.createElement('br'),p);p.remove()});Array.from(c.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(h=>{const s={H1:'22px',H2:'19px',H3:'17px',H4:'15px',H5:'14px',H6:'14px'};h.removeAttribute('class');h.removeAttribute('id');h.setAttribute('style','font-size:'+(s[h.tagName]||'18px')+';font-weight:bold;color:#111111;border:none;padding:0;margin:18px 0 ${hSpace ? '0' : '8px'} 0;');if(${hSpace}&&h.parentNode){const sp=document.createElement('p');sp.setAttribute('style','font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;');sp.innerHTML='<br>';h.parentNode.insertBefore(sp,h.nextSibling)}});c.querySelectorAll('div.highlighter-rouge,pre').forEach(b=>{if(!b.parentNode)return;const tb=document.createElement('table');tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','10');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #e1e4e8;background-color:#f6f8fa;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','background-color:#f6f8fa;border:1px solid #e1e4e8;padding:10px;font-family:Consolas,monospace;font-size:13px;color:#24292e;white-space:pre-wrap;line-height:1.5;');td.innerText=b.innerText.trim();tr.appendChild(td);tb.appendChild(tr);b.parentNode.replaceChild(tb,b)});c.querySelectorAll('code').forEach(cd=>{cd.removeAttribute('class');cd.setAttribute('style','background-color:#f0f0f0;color:#d63384;padding:2px 4px;font-family:Consolas,monospace;')});c.querySelectorAll('blockquote').forEach(bq=>{const ps=Array.from(bq.querySelectorAll('p'));ps.forEach((p,i)=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);if(i<ps.length-1){p.parentNode.insertBefore(document.createElement('br'),p);p.parentNode.insertBefore(document.createElement('br'),p)}p.remove()});const tb=document.createElement('table');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','8');tb.setAttribute('style','width:100%;border-collapse:collapse;margin:8px 0;');const tr=document.createElement('tr'),td=document.createElement('td');td.setAttribute('style','border-left:4px solid #4a5568;background-color:#f8f9fa;padding:8px 12px;color:#4a5568;');td.innerHTML=bq.innerHTML.trim();tr.appendChild(td);tb.appendChild(tr);bq.parentNode.replaceChild(tb,bq)});c.querySelectorAll('table').forEach(tb=>{if(tb.getAttribute('style')?.includes('#f6f8fa')||tb.querySelector('td[style*="border-left:4px"]'))return;tb.setAttribute('border','1');tb.setAttribute('cellspacing','0');tb.setAttribute('cellpadding','6');tb.setAttribute('style','width:100%;border-collapse:collapse;border:1px solid #cccccc;margin:10px 0;');tb.querySelectorAll('th').forEach(th=>th.setAttribute('style','background-color:#f2f2f2;border:1px solid #cccccc;padding:6px 8px;font-weight:bold;text-align:left;'));tb.querySelectorAll('td').forEach(td=>td.setAttribute('style','border:1px solid #cccccc;padding:6px 8px;'))});const ps='font-size:16px;line-height:1.7;color:#333333;margin:0;border:none;';Array.from(c.querySelectorAll('p')).forEach(p=>{p.removeAttribute('class');p.setAttribute('style',ps);const nx=p.nextElementSibling;if(nx&&nx.tagName==='P'&&(p.textContent.trim()||p.querySelector('img'))){const sp=document.createElement('p');sp.setAttribute('style',ps);sp.innerHTML='<br>';p.parentNode.insertBefore(sp,nx)}});document.addEventListener('copy',e=>{e.clipboardData.setData('text/html',c.innerHTML);e.clipboardData.setData('text/plain',c.innerText);e.preventDefault()},{once:true});document.execCommand('copy');alert('${msgCopied}');})();`;
 
       bookmarkletLink.setAttribute('href', bmCode);
     }
@@ -1455,7 +1475,7 @@ function helloNaverBlog() {
     excludeSelectorInput.addEventListener('input', updatePreview);
 
     // Options change listeners
-    ['optRemoveHr', 'optStripHeaderBorder', 'optCodeToTable', 'optQuoteToTable', 'optUnwrapLiP', 'optParagraphSpacing', 'optCodeTheme'].forEach(id => {
+    ['optRemoveHr', 'optStripHeaderBorder', 'optCodeToTable', 'optQuoteToTable', 'optUnwrapLiP', 'optParagraphSpacing', 'optHeadingSpacing', 'optCodeTheme'].forEach(id => {
       document.getElementById(id).addEventListener('change', updatePreview);
     });
 
